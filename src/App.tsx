@@ -1,12 +1,15 @@
 import "./App.css";
 import { TonConnectButton } from "@tonconnect/ui-react";
 import { useTonConnect } from "./hooks/useTonConnect";
-import { useCounterContract } from "./hooks/useCounterContract";
 import "@twa-dev/sdk";
+import { useReferralContract } from "./hooks/useReferralContract";
+import { useState } from "react";
 
 function App() {
   const { connected } = useTonConnect();
-  const { value, address, sendIncrement } = useCounterContract();
+  const { value, address, sendDeposit } = useReferralContract();
+  const [userId, setUserId] = useState(0);
+  const [amount, setAmount] = useState(0);
 
   return (
     <div className="App">
@@ -14,22 +17,45 @@ function App() {
         <TonConnectButton />
 
         <div className="Card">
-          <b>Counter Address</b>
+          <b>Referral Distribution Address</b>
           <div className="Hint">{address?.slice(0, 30) + "..."}</div>
         </div>
 
         <div className="Card">
-          <b>Counter Value</b>
+          <b>Contract Value in Ton</b>
           <div>{value ?? "Loading..."}</div>
+        </div>
+
+        <div className="Card">
+          <label htmlFor="userIdInput">UserId</label>
+          <div>
+            <input
+              id="userIdInput"
+              type="number"
+              onChange={(e) => setUserId(Number(e.target.value))}
+              value={userId}
+            />
+          </div>
+        </div>
+
+        <div className="Card">
+          <label htmlFor="amountInput">Ton to distribute</label>
+          <div>
+            <input
+              type="number"
+              onChange={(e) => setAmount(Number(e.target.value))}
+              value={amount}
+            />
+          </div>
         </div>
 
         <a
           className={`Button ${connected ? "Active" : "Disabled"}`}
           onClick={() => {
-            sendIncrement();
+            sendDeposit(userId, amount);
           }}
         >
-          Increment
+          Deposit
         </a>
       </div>
     </div>
