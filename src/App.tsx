@@ -8,8 +8,8 @@ import { useState } from "react";
 function App() {
   const { connected } = useTonConnect();
   const { value, address, sendDeposit } = useReferralContract();
-  const [userId, setUserId] = useState();
-  const [amount, setAmount] = useState();
+  const [userId, setUserId] = useState("");
+  const [amount, setAmount] = useState("");
 
   return (
     <div className="App">
@@ -32,11 +32,7 @@ function App() {
             <input
               id="userIdInput"
               type="number"
-              onChange={(e) =>
-                typeof e.target.value === "number" && e.target.value
-                  ? setUserId(e.target.value)
-                  : null
-              }
+              onChange={(e) => setUserId(e.target.value)}
               value={userId}
             />
           </div>
@@ -48,22 +44,16 @@ function App() {
             <input
               type="number"
               id="amountInput"
-              onChange={(e) =>
-                typeof e.target.value === "number" && e.target.value
-                  ? setAmount(e.target.value)
-                  : null
-              }
+              onChange={(e) => setAmount(e.target.value)}
               value={amount}
             />
           </div>
         </div>
 
         <a
-          className={`Button ${
-            connected && userId && amount ? "Active" : "Disabled"
-          }`}
+          className={`Button ${connected ? "Active" : "Disabled"}`}
           onClick={() => {
-            sendDeposit(userId!, amount!);
+            sendDeposit(userId, amount);
           }}
         >
           Deposit

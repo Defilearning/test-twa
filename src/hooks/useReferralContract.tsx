@@ -37,10 +37,10 @@ export function useReferralContract() {
   return {
     value: val,
     address: ReferralContract?.address.toString(),
-    sendDeposit: (userId: number, amount: number) => {
+    sendDeposit: (userId: string, amount: string) => {
       return ReferralContract?.send(
         sender,
-        { value: toNano(amount + 0.04) },
+        { value: toNano(Number(amount) + 0.04) },
         { $$type: "Deposit", amount: toNano(amount), userId: BigInt(userId) }
       );
     },
