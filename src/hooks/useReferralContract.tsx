@@ -17,7 +17,7 @@ export function useReferralContract() {
     if (!client) return;
     return client.open(
       ReferralDistributionV2.fromAddress(
-        Address.parse("kQBTT8cqTKhqCmRcE4nPIUK8T8dF9C29UtwUGLsk8ylIyJRu")
+        Address.parse("kQAtqYJghJgvf5rvx_C_Dlqs6pfUhAxTN4QuFmh5Fu7i1W4V")
       )
     ) as OpenedContract<ReferralDistributionV2>;
   }, [client]);
@@ -40,7 +40,7 @@ export function useReferralContract() {
     sendDeposit: (userId: string, amount: string) => {
       return ReferralContract?.send(
         sender,
-        { value: toNano(Number(amount) + 0.04) },
+        { value: toNano(Number(amount) + 0.06) },
         { $$type: "Deposit", amount: toNano(amount), userId: BigInt(userId) }
       );
     },
