@@ -13,6 +13,7 @@ function App() {
 
   return (
     <div className="App">
+      {console.log(window.Telegram.WebApp)}
       <div className="Container">
         <TonConnectButton />
 
