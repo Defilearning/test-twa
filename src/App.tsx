@@ -4,16 +4,19 @@ import { useTonConnect } from "./hooks/useTonConnect";
 import "@twa-dev/sdk";
 import { useReferralContract } from "./hooks/useReferralContract";
 import { useState } from "react";
+import { useWebApp } from "@vkruglikov/react-telegram-web-app";
 
 function App() {
   const { connected } = useTonConnect();
   const { value, address, sendDeposit } = useReferralContract();
   const [userId, setUserId] = useState("");
   const [amount, setAmount] = useState("");
+  const webApp = useWebApp();
+
+  console.log(webApp);
 
   return (
     <div className="App">
-      {console.log(window.Telegram.WebApp)}
       <div className="Container">
         <TonConnectButton />
 
