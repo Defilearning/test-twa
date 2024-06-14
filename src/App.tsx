@@ -64,6 +64,8 @@ function App() {
         >
           Deposit
         </a>
+
+        <p>{JSON.stringify(initData)}</p>
       </div>
     </div>
   );
