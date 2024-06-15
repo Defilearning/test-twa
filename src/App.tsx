@@ -47,9 +47,9 @@ function App() {
     };
 
     if (referralCode) {
-      fetchConfig.body = {
+      fetchConfig.body = JSON.stringify({
         referralCode,
-      };
+      });
     }
 
     const response = await fetch(`${backendUrl}/auth/register`, fetchConfig);
