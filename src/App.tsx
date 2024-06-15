@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import "./App.css";
 import { TonConnectButton } from "@tonconnect/ui-react";
 import { useTonConnect } from "./hooks/useTonConnect";
@@ -20,7 +21,7 @@ function App() {
   const loginHandler = async () => {
     if (!initData || !initData[1]) return;
 
-    const response = await fetch(`${backendUrl}/login`, {
+    const response = await fetch(`${backendUrl}/auth/login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -51,15 +52,15 @@ function App() {
       };
     }
 
-    const response = await fetch(`${backendUrl}/register`, fetchConfig);
+    const response = await fetch(`${backendUrl}/auth/register`, fetchConfig);
 
     const result = await response.json();
 
     console.log(result);
   };
 
-  console.log(webApp);
-  console.log(initData);
+  // console.log(webApp);
+  // console.log(initData);
 
   return (
     <div className="App">
