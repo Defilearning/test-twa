@@ -6,13 +6,57 @@ import { useReferralContract } from "./hooks/useReferralContract";
 import { useState } from "react";
 import { useWebApp, useInitData } from "@vkruglikov/react-telegram-web-app";
 
+const backendUrl = import.meta.env.VITE_BACKEND_URL;
+
 function App() {
   const { connected } = useTonConnect();
   const { value, address, sendDeposit } = useReferralContract();
   const [userId, setUserId] = useState("");
   const [amount, setAmount] = useState("");
+  const [referralCode, setReferralCode] = useState("");
   const webApp = useWebApp();
   const initData = useInitData();
+
+  const loginHandler = async () => {
+    if (!initData || !initData[1]) return;
+
+    const response = await fetch(`${backendUrl}/login`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        twa: initData[1],
+      },
+    });
+
+    const result = await response.json();
+
+    console.log(result);
+  };
+
+  const registerHandler = async () => {
+    if (!initData || !initData[1]) return;
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const fetchConfig: any = {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        twa: initData[1],
+      },
+    };
+
+    if (referralCode) {
+      fetchConfig.body = {
+        referralCode,
+      };
+    }
+
+    const response = await fetch(`${backendUrl}/register`, fetchConfig);
+
+    const result = await response.json();
+
+    console.log(result);
+  };
 
   console.log(webApp);
   console.log(initData);
@@ -56,6 +100,18 @@ function App() {
           </div>
         </div>
 
+        <div className="Card">
+          <label htmlFor="referralCodeInput">ReferralCode</label>
+          <div>
+            <input
+              type="text"
+              id="referralCodeInput"
+              onChange={(e) => setReferralCode(e.target.value)}
+              value={referralCode}
+            />
+          </div>
+        </div>
+
         <a
           className={`Button ${connected ? "Active" : "Disabled"}`}
           onClick={() => {
@@ -65,7 +121,10 @@ function App() {
           Deposit
         </a>
 
-        <p>{JSON.stringify(initData)}</p>
+        {/* <p>{JSON.stringify(initData)}</p> */}
+
+        <button onClick={loginHandler}>Login</button>
+        <button onClick={registerHandler}>Register</button>
       </div>
     </div>
   );
