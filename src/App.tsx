@@ -5,7 +5,7 @@ import { useTonConnect } from "./hooks/useTonConnect";
 import "@twa-dev/sdk";
 import { useReferralContract } from "./hooks/useReferralContract";
 import { useState } from "react";
-import { useWebApp, useInitData } from "@vkruglikov/react-telegram-web-app";
+import { useInitData } from "@vkruglikov/react-telegram-web-app";
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
@@ -15,7 +15,7 @@ function App() {
   const [userId, setUserId] = useState("");
   const [amount, setAmount] = useState("");
   const [referralCode, setReferralCode] = useState("");
-  const webApp = useWebApp();
+  // const webApp = useWebApp();
   const initData = useInitData();
 
   const loginHandler = async () => {
