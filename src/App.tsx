@@ -65,7 +65,7 @@ function App() {
 
     const result = await response.json();
 
-    setAccessToken(result);
+    setAccessToken(result.token.accessToken);
   };
 
   const registerHandler = async () => {
