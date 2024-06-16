@@ -4,6 +4,7 @@ import "./App.css";
 import {
   TonConnectButton,
   TonProofItemReplySuccess,
+  useTonConnectUI,
   useTonWallet,
 } from "@tonconnect/ui-react";
 import { useTonConnect } from "./hooks/useTonConnect";
@@ -15,6 +16,7 @@ import { useInitData } from "@vkruglikov/react-telegram-web-app";
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
 function App() {
+  const [tonConnectUI] = useTonConnectUI();
   const { connected } = useTonConnect();
   const { value, address, sendDeposit } = useReferralContract();
   const [userId, setUserId] = useState("");
@@ -24,6 +26,31 @@ function App() {
   // const webApp = useWebApp();
   const initData = useInitData();
   const wallet = useTonWallet();
+
+  useEffect(() => {
+    async function fetchTonProofPayloadFromBackend() {
+      // fetch you tonProofPayload from the backend
+      const response = await fetch(`${backendUrl}/nonce`, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+
+      const result = await response.json();
+
+      console.log(result);
+
+      // add tonProof to the connect request
+      tonConnectUI.setConnectRequestParameters({
+        state: "ready",
+        value: { tonProof: result.nonce },
+      });
+    }
+
+    if (!accessToken) return;
+    fetchTonProofPayloadFromBackend();
+  }, [accessToken, tonConnectUI]);
 
   const loginHandler = async () => {
     if (!initData || !initData[1]) return;
