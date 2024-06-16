@@ -4,7 +4,7 @@ import { TonConnectButton } from "@tonconnect/ui-react";
 import { useTonConnect } from "./hooks/useTonConnect";
 import "@twa-dev/sdk";
 import { useReferralContract } from "./hooks/useReferralContract";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useInitData } from "@vkruglikov/react-telegram-web-app";
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
@@ -58,6 +58,18 @@ function App() {
 
     console.log(result);
   };
+
+  useEffect(() => {
+    const fetchMe = async () => {
+      const response = await fetch(`${backendUrl}/auth/me`);
+
+      const result = await response.json();
+
+      console.log(result);
+    };
+
+    fetchMe();
+  }, []);
 
   // console.log(webApp);
   // console.log(initData);
