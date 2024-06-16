@@ -15,6 +15,7 @@ function App() {
   const [userId, setUserId] = useState("");
   const [amount, setAmount] = useState("");
   const [referralCode, setReferralCode] = useState("");
+  const [accessToken, setAccessToken] = useState("");
   // const webApp = useWebApp();
   const initData = useInitData();
 
@@ -31,7 +32,7 @@ function App() {
 
     const result = await response.json();
 
-    console.log(result);
+    setAccessToken(result);
   };
 
   const registerHandler = async () => {
@@ -134,7 +135,7 @@ function App() {
           Deposit
         </a>
 
-        {/* <p>{JSON.stringify(initData)}</p> */}
+        <p>{JSON.stringify(accessToken)}</p>
 
         <button onClick={loginHandler}>Login</button>
         <button onClick={registerHandler}>Register</button>
