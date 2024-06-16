@@ -1,6 +1,11 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import "./App.css";
-import { TonConnectButton } from "@tonconnect/ui-react";
+import {
+  TonConnectButton,
+  TonProofItemReplySuccess,
+  useTonWallet,
+} from "@tonconnect/ui-react";
 import { useTonConnect } from "./hooks/useTonConnect";
 import "@twa-dev/sdk";
 import { useReferralContract } from "./hooks/useReferralContract";
@@ -18,6 +23,7 @@ function App() {
   const [accessToken, setAccessToken] = useState("");
   // const webApp = useWebApp();
   const initData = useInitData();
+  const wallet = useTonWallet();
 
   const loginHandler = async () => {
     if (!initData || !initData[1]) return;
@@ -74,6 +80,46 @@ function App() {
 
   // console.log(webApp);
   // console.log(initData);
+  console.log(wallet);
+
+  const bindWalletHandler = async () => {
+    if (!wallet) {
+      throw new Error("No wallet is connected");
+    }
+
+    if (!wallet.connectItems && !wallet.connectItems) {
+      throw new Error("No connected Items");
+    }
+
+    const tonProofReply = wallet.connectItems
+      .tonProof as TonProofItemReplySuccess;
+
+    if (!tonProofReply) {
+      throw new Error("No tonProofReply");
+    }
+
+    const toBindData: any = {
+      address: wallet.account.address,
+      domain: tonProofReply.proof.domain.value,
+      stateInit: wallet.account.walletStateInit,
+      signature: tonProofReply.proof.signature,
+      payload: tonProofReply.proof.payload,
+      timestamp: tonProofReply.proof.timestamp,
+    };
+
+    const response = await fetch(`${backendUrl}/users/bind-wallet`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify(toBindData),
+    });
+
+    const result = await response.json();
+
+    console.log(result);
+  };
 
   return (
     <div className="App">
@@ -139,6 +185,7 @@ function App() {
 
         <button onClick={loginHandler}>Login</button>
         <button onClick={registerHandler}>Register</button>
+        <button onClick={bindWalletHandler}>Bind Wallet</button>
       </div>
     </div>
   );
