@@ -170,7 +170,7 @@ function App() {
         </div>
 
         <div className="Card">
-          <label htmlFor="amountInput">Ton to distribute</label>
+          <label htmlFor="amountInput">Pet Amount</label>
           <div>
             <input
               type="number"
