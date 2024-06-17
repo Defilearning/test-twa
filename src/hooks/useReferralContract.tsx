@@ -5,6 +5,8 @@ import { useTonConnect } from "./useTonConnect";
 import { Address, OpenedContract, toNano, fromNano } from "@ton/core";
 import { ReferralDistributionV2 } from "../contracts/referralDistribution";
 
+const contractAddress = import.meta.env.VITE_CONTRACT_ADDRESS;
+
 export function useReferralContract() {
   const client = useTonClient();
   const [val, setVal] = useState<null | string>();
@@ -16,9 +18,7 @@ export function useReferralContract() {
   const ReferralContract = useAsyncInitialize(async () => {
     if (!client) return;
     return client.open(
-      ReferralDistributionV2.fromAddress(
-        Address.parse("kQAtqYJghJgvf5rvx_C_Dlqs6pfUhAxTN4QuFmh5Fu7i1W4V")
-      )
+      ReferralDistributionV2.fromAddress(Address.parse(contractAddress))
     ) as OpenedContract<ReferralDistributionV2>;
   }, [client]);
 
@@ -37,11 +37,11 @@ export function useReferralContract() {
   return {
     value: val,
     address: ReferralContract?.address.toString(),
-    sendDeposit: (userId: string, amount: string) => {
+    sendDeposit: (userId: string, amount: string, petConfigId: string) => {
       return ReferralContract?.send(
         sender,
         { value: toNano(Number(amount) + 0.06) },
-        { $$type: "Deposit", amount: toNano(amount), userId: BigInt(userId) }
+        { $$type: "Deposit", amount: toNano(amount), userId, petConfigId }
       );
     },
   };

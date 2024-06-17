@@ -21,6 +21,7 @@ function App() {
   const { value, address, sendDeposit } = useReferralContract();
   const [userId, setUserId] = useState("");
   const [amount, setAmount] = useState("");
+  const [petConfigId, sePetConfigId] = useState("");
   const [referralCode, setReferralCode] = useState("");
   const [accessToken, setAccessToken] = useState("");
   // const webApp = useWebApp();
@@ -66,6 +67,7 @@ function App() {
     const result = await response.json();
 
     setAccessToken(result.token.accessToken);
+    setUserId(result.user.id);
   };
 
   const registerHandler = async () => {
@@ -164,15 +166,7 @@ function App() {
         </div>
 
         <div className="Card">
-          <label htmlFor="userIdInput">UserId</label>
-          <div>
-            <input
-              id="userIdInput"
-              type="number"
-              onChange={(e) => setUserId(e.target.value)}
-              value={userId}
-            />
-          </div>
+          <p>UserId: {userId}</p>
         </div>
 
         <div className="Card">
@@ -183,6 +177,18 @@ function App() {
               id="amountInput"
               onChange={(e) => setAmount(e.target.value)}
               value={amount}
+            />
+          </div>
+        </div>
+
+        <div className="Card">
+          <label htmlFor="petConfigIdInput">Pet Config Id</label>
+          <div>
+            <input
+              type="text"
+              id="petConfigIdInput"
+              onChange={(e) => sePetConfigId(e.target.value)}
+              value={petConfigId}
             />
           </div>
         </div>
@@ -202,13 +208,13 @@ function App() {
         <a
           className={`Button ${connected ? "Active" : "Disabled"}`}
           onClick={() => {
-            sendDeposit(userId, amount);
+            sendDeposit(userId, amount, petConfigId);
           }}
         >
           Deposit
         </a>
 
-        <p>{JSON.stringify(accessToken)}</p>
+        {/* <p>{JSON.stringify(accessToken)}</p> */}
 
         <button onClick={loginHandler}>Login</button>
         <button onClick={registerHandler}>Register</button>
