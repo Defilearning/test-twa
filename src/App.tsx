@@ -108,7 +108,7 @@ function App() {
   }, []);
 
   // console.log(webApp);
-  // console.log(initData);
+  console.log(initData);
   console.log(wallet);
 
   const bindWalletHandler = async () => {
