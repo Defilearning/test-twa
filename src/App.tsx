@@ -214,6 +214,7 @@ function App() {
           Deposit
         </a>
 
+        <a href="https://t.me/share/url?url=https://app.tonbuddy.com">Share</a>
         {/* <p>{JSON.stringify(accessToken)}</p> */}
 
         <button onClick={loginHandler}>Login</button>
