@@ -3,9 +3,10 @@ import App from "./App";
 import "./index.css";
 import { TonConnectUIProvider } from "@tonconnect/ui-react";
 
+const manifestURL = import.meta.env.MANIFEST_URL;
+
 // this manifest is used temporarily for development purposes
-const manifestUrl =
-  "https://jinjie-test-twa.netlify.app/tonconnect-manifest.json";
+const manifestUrl = manifestURL;
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <TonConnectUIProvider manifestUrl={manifestUrl}>
