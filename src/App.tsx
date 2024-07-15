@@ -116,6 +116,9 @@ function App() {
       throw new Error("No wallet is connected");
     }
 
+    console.log("wallet");
+    console.log(wallet);
+
     if (!wallet.connectItems && !wallet.connectItems) {
       throw new Error("No connected Items");
     }
