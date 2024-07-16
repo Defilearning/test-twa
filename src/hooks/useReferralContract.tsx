@@ -40,8 +40,8 @@ export function useReferralContract() {
     sendDeposit: (userId: string, amount: string, petConfigId: string) => {
       return ReferralContract?.send(
         sender,
-        { value: toNano(Number(amount) + 0.06) },
-        { $$type: "Deposit", amount: toNano(amount), userId, petConfigId }
+        { value: BigInt(Number(amount)) + toNano(0.06) },
+        { $$type: "Deposit", amount: BigInt(amount), userId, petConfigId }
       );
     },
   };
