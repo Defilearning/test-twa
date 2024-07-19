@@ -148,7 +148,7 @@ function App() {
     try {
       setErrorMessage("");
       const response = await fetch(
-        `${backendUrl}/player-status/buy-utils`,
+        `${backendUrl}/player-status/buy-util`,
         fetchConfig
       );
 
