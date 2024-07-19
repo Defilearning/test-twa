@@ -18,12 +18,13 @@ const backendUrl = import.meta.env.VITE_BACKEND_URL;
 function App() {
   const [tonConnectUI] = useTonConnectUI();
   const { connected } = useTonConnect();
-  const { value, address, sendDeposit } = useReferralContract();
+  const { value, address, sendDeposit, sendBuyUtils } = useReferralContract();
   const [userId, setUserId] = useState("");
-  const [amount, setAmount] = useState("");
+  const [utilsType, setUtilsType] = useState("");
   const [petConfigId, sePetConfigId] = useState("");
   const [referralCode, setReferralCode] = useState("");
   const [accessToken, setAccessToken] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
   // const webApp = useWebApp();
   const initData = useInitData();
   const wallet = useTonWallet();
@@ -95,6 +96,75 @@ function App() {
     console.log(result);
   };
 
+  const depositHandler = async () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const fetchConfig: any = {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify({
+        petConfigId,
+      }),
+    };
+
+    try {
+      setErrorMessage("");
+      const response = await fetch(
+        `${backendUrl}/player-status/buy-pet`,
+        fetchConfig
+      );
+
+      const result: any = await response.json();
+
+      sendDeposit(userId, result.amount, result.petConfigId);
+
+      console.log(result);
+    } catch (err: any) {
+      console.log(err);
+      if (err.message) {
+        setErrorMessage(err.message);
+      }
+    }
+  };
+
+  const buyUtilsHandler = async () => {
+    if (utilsType !== "AutoPickup" && utilsType !== "Boost") {
+      setErrorMessage("Utils can only be 'AutoPickup' or 'Boost'");
+    }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const fetchConfig: any = {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify({
+        type: utilsType,
+      }),
+    };
+
+    try {
+      setErrorMessage("");
+      const response = await fetch(
+        `${backendUrl}/player-status/buy-utils`,
+        fetchConfig
+      );
+
+      const result: any = await response.json();
+
+      sendBuyUtils(userId, result.amount, BigInt(result.opCode));
+
+      console.log(result);
+    } catch (err: any) {
+      console.log(err);
+      if (err.message) {
+        setErrorMessage(err.message);
+      }
+    }
+  };
+
   useEffect(() => {
     const fetchMe = async () => {
       const response = await fetch(`${backendUrl}/auth/me`);
@@ -106,10 +176,6 @@ function App() {
 
     fetchMe();
   }, []);
-
-  // console.log(webApp);
-  console.log(initData);
-  console.log(wallet);
 
   const bindWalletHandler = async () => {
     if (!wallet) {
@@ -173,13 +239,13 @@ function App() {
         </div>
 
         <div className="Card">
-          <label htmlFor="amountInput">Pet Amount</label>
+          <label htmlFor="utilsTypeInput">Uitls Type</label>
           <div>
             <input
-              type="number"
-              id="amountInput"
-              onChange={(e) => setAmount(e.target.value)}
-              value={amount}
+              type="text"
+              id="utilsTypeInput"
+              onChange={(e) => sePetConfigId(e.target.value)}
+              value={petConfigId}
             />
           </div>
         </div>
@@ -210,11 +276,15 @@ function App() {
 
         <a
           className={`Button ${connected ? "Active" : "Disabled"}`}
-          onClick={() => {
-            sendDeposit(userId, amount, petConfigId);
-          }}
+          onClick={depositHandler}
         >
           Deposit
+        </a>
+        <a
+          className={`Button ${connected ? "Active" : "Disabled"}`}
+          onClick={buyUtilsHandler}
+        >
+          Buy Utils
         </a>
 
         <a href="https://t.me/share/url?url=https://app.tonbuddy.com">Share</a>

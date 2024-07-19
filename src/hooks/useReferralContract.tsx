@@ -44,5 +44,12 @@ export function useReferralContract() {
         { $$type: "Deposit", amount: BigInt(amount), userId, petConfigId }
       );
     },
+    sendBuyUtils: (userId: string, amount: string, opCode: bigint) => {
+      return ReferralContract?.send(
+        sender,
+        { value: BigInt(Number(amount)) + toNano(0.03) },
+        { $$type: "BuyUtils", opCode: opCode, userId }
+      );
+    },
   };
 }
