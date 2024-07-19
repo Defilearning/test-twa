@@ -244,8 +244,8 @@ function App() {
             <input
               type="text"
               id="utilsTypeInput"
-              onChange={(e) => sePetConfigId(e.target.value)}
-              value={petConfigId}
+              onChange={(e) => setUtilsType(e.target.value)}
+              value={utilsType}
             />
           </div>
         </div>
@@ -273,6 +273,8 @@ function App() {
             />
           </div>
         </div>
+
+        {errorMessage && <div className="Error">{errorMessage}</div>}
 
         <a
           className={`Button ${connected ? "Active" : "Disabled"}`}
