@@ -48,7 +48,7 @@ export function useReferralContract() {
       return ReferralContract?.send(
         sender,
         { value: BigInt(Number(amount)) + toNano(0.03) },
-        { $$type: "BuyUtils", opCode: opCode, userId }
+        { $$type: "BuyUtils", opCode, userId }
       );
     },
   };
