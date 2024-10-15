@@ -14,10 +14,7 @@ import { useEffect, useState } from "react";
 import { useInitData } from "@vkruglikov/react-telegram-web-app";
 import { beginCell, toNano, Address } from "@ton/ton";
 import { useTonClient } from "./hooks/useTonClient";
-import {
-  JettonWallet,
-  JettonMaster,
-} from "@ton/ton";
+import { JettonWallet, JettonMaster } from "@ton/ton";
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
@@ -32,34 +29,10 @@ function App() {
   const [referralCode, setReferralCode] = useState("");
   const [accessToken, setAccessToken] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const [web3Login, setWeb3Login] = useState(false);
   // const webApp = useWebApp();
   const initData = useInitData();
   const wallet = useTonWallet();
-
-  useEffect(() => {
-    async function fetchTonProofPayloadFromBackend() {
-      // fetch you tonProofPayload from the backend
-      const response = await fetch(`${backendUrl}/nonce`, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
-
-      const result = await response.json();
-
-      console.log(result);
-
-      // add tonProof to the connect request
-      tonConnectUI.setConnectRequestParameters({
-        state: "ready",
-        value: { tonProof: result.nonce },
-      });
-    }
-
-    if (!accessToken) return;
-    fetchTonProofPayloadFromBackend();
-  }, [accessToken, tonConnectUI]);
 
   const loginHandler = async () => {
     if (!initData || !initData[1]) return;
@@ -184,46 +157,100 @@ function App() {
     fetchMe();
   }, []);
 
-  const bindWalletHandler = async () => {
-    if (!wallet) {
-      throw new Error("No wallet is connected");
+  useEffect(() => {
+    async function loginWithWeb3() {
+      if (!wallet || !wallet.connectItems || !web3Login) return;
+      const tonProofReply = wallet.connectItems
+        .tonProof as TonProofItemReplySuccess;
+
+      if (!tonProofReply) {
+        return;
+      }
+
+      const toSendRequest = {
+        payload: tonProofReply.proof.payload,
+        domain: tonProofReply.proof.domain.value,
+        stateInit: wallet.account.walletStateInit,
+        signature: tonProofReply.proof.signature,
+        address: wallet.account.address,
+        publicKey: wallet.account.publicKey,
+        timestamp: tonProofReply.proof.timestamp,
+        referralCode: undefined,
+      };
+
+      console.log(toSendRequest);
+
+      const loginRes = await fetch(`${backendUrl}/v1/auth/login`, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(toSendRequest),
+        method: "POST",
+      });
+
+      const loginResult = await loginRes.json();
+      console.log(loginResult);
+
+      if (
+        loginResult.statusCode &&
+        loginResult.statusCode.toString().startsWith(4)
+      ) {
+        const registerRes = await fetch(`${backendUrl}/v1/auth/register`, {
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(toSendRequest),
+          method: "POST",
+        });
+
+        const registerResult = await registerRes.json();
+        console.log(registerResult);
+
+        const loginRes = await fetch(`${backendUrl}/v1/auth/login`, {
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(toSendRequest),
+          method: "POST",
+        });
+
+        const loginResult = await loginRes.json();
+        console.log(loginResult);
+      }
+
+      setWeb3Login(false);
     }
 
-    console.log("wallet");
-    console.log(wallet);
+    loginWithWeb3();
+  }, [wallet, tonConnectUI, web3Login]);
 
-    if (!wallet.connectItems && !wallet.connectItems) {
-      throw new Error("No connected Items");
+  const web3LoginHandler = async () => {
+    if (wallet) {
+      // fetch you tonProofPayload from the backend
+      const nonceRes = await fetch(
+        `${backendUrl}/v1/nonce?walletAddress=${wallet.account.address}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      const nonceResult = await nonceRes.json();
+
+      tonConnectUI.setConnectRequestParameters({
+        state: "ready",
+        value: {
+          tonProof: nonceResult.nonce,
+        },
+      });
+
+      await tonConnectUI.disconnect();
     }
 
-    const tonProofReply = wallet.connectItems
-      .tonProof as TonProofItemReplySuccess;
+    await tonConnectUI.openModal();
 
-    if (!tonProofReply) {
-      throw new Error("No tonProofReply");
-    }
-
-    const toBindData: any = {
-      address: wallet.account.address,
-      domain: tonProofReply.proof.domain.value,
-      stateInit: wallet.account.walletStateInit,
-      signature: tonProofReply.proof.signature,
-      payload: tonProofReply.proof.payload,
-      timestamp: tonProofReply.proof.timestamp,
-    };
-
-    const response = await fetch(`${backendUrl}/users/bind-wallet`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${accessToken}`,
-      },
-      body: JSON.stringify(toBindData),
-    });
-
-    const result = await response.json();
-
-    console.log(result);
+    setWeb3Login(true);
   };
 
   const transferNotCoinsHandler = async () => {
@@ -231,9 +258,9 @@ function App() {
     // response_destination:MsgAddress custom_payload:(Maybe ^Cell)
     // forward_ton_amount:(VarUInteger 16) forward_payload:(Either Cell ^Cell)
     // = InternalMsgBody;
-    
-    if(!client){
-      return
+
+    if (!client) {
+      return;
     }
 
     const destinationAddress = Address.parse(
@@ -257,22 +284,21 @@ function App() {
       .storeRef(forwardPayload)
       .endCell();
 
+    const jettonMaster = JettonMaster.create(
+      Address.parse("EQAvlWFDxGF2lXm67y4yzC17wYKD9A0guwPkMs1gOsM__NOT") // jetton master address
+    );
 
-      const jettonMaster = JettonMaster.create(
-        Address.parse("EQAvlWFDxGF2lXm67y4yzC17wYKD9A0guwPkMs1gOsM__NOT") // jetton master address
-      );
-    
-      const jettonMasterContract = client.open(jettonMaster);
-    
-      const jettonWalletAddress = await jettonMasterContract.getWalletAddress(
-        Address.parse("UQBIpSWj7JWgCAvWfUHeB5t-r5BlpbSe0YTrhDQ8sQe2jjnu") // user wallet address
-      );
-    
-      console.log(jettonWalletAddress);
-    
-      const jettonWallet = JettonWallet.create(jettonWalletAddress);
-    
-      const jettonWalletContract = client.open(jettonWallet);
+    const jettonMasterContract = client.open(jettonMaster);
+
+    const jettonWalletAddress = await jettonMasterContract.getWalletAddress(
+      Address.parse("UQBIpSWj7JWgCAvWfUHeB5t-r5BlpbSe0YTrhDQ8sQe2jjnu") // user wallet address
+    );
+
+    console.log(jettonWalletAddress);
+
+    const jettonWallet = JettonWallet.create(jettonWalletAddress);
+
+    const jettonWalletContract = client.open(jettonWallet);
 
     const myTransaction = {
       validUntil: Math.floor(Date.now() / 1000) + 360,
@@ -291,8 +317,6 @@ function App() {
   return (
     <div className="App">
       <div className="Container">
-        <TonConnectButton />
-
         <div className="Card">
           <b>Referral Distribution Address</b>
           <div className="Hint">{address?.slice(0, 30) + "..."}</div>
@@ -363,7 +387,13 @@ function App() {
 
         <button onClick={loginHandler}>Login</button>
         <button onClick={registerHandler}>Register</button>
-        <button onClick={bindWalletHandler}>Bind Wallet</button>
+
+        <TonConnectButton />
+
+        <p>{wallet?.account.address}</p>
+        <button onClick={web3LoginHandler}>
+          {!wallet ? "Select Wallet to Login with Web3" : "Login with Web3"}
+        </button>
         <button onClick={transferNotCoinsHandler}>Transfer Not Coin</button>
       </div>
     </div>
